@@ -2,8 +2,7 @@ import { useContext, useState } from 'react'
 import axios from 'axios'
 import { UIContext, PostContext } from '../../../App'
 import { useHistory } from 'react-router-dom'
-import { storage } from '../../../firebase/firebase'
-const url = process.env.REACT_APP_ENDPOINT
+const url = 'http://localhost:3001'
 
 const useCreatePost = ({
   postData,
@@ -20,22 +19,18 @@ const useCreatePost = ({
 
   const createPost = async (data) => {
     setLoading(true)
-    let token = localStorage.token && JSON.parse(localStorage.getItem('token'))
+    const userId = parseInt(localStorage.getItem('userId'))
     try {
-      const response = await axios.post(`${url}/api/post/`, data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      const response = await axios.post(`${url}/posts`, { ...data, userId })
 
       setLoading(false)
-      postDispatch({ type: 'ADD_POST', payload: response.data.post })
+      postDispatch({ type: 'ADD_POST', payload: response.data })
       uiDispatch({
         type: 'SET_MESSAGE',
         payload: {
           color: 'success',
           display: true,
-          text: response.data.message,
+          text: 'Post created successfully',
         },
       })
       uiDispatch({ type: 'SET_POST_MODEL', payload: false })
@@ -63,61 +58,18 @@ const useCreatePost = ({
       body: {
         ...body,
       },
+      createdAt: new Date().toISOString(),
+      likes: [],
+      comments: [],
+      profilePostData: {},
     })
   }
 
   const handleSubmitPost = (e) => {
     e.preventDefault()
 
-    if (isImageCaptured) {
-      let filename = `post/post-${Date.now()}.png`
-      const task = storage.ref(`images/${filename}`).put(blob)
-
-      task.on(
-        'state_changed',
-
-        function () {
-          setLoading(true)
-        },
-        function (error) {
-          console.log('error from firebase')
-          setLoading(false)
-          uiDispatch({ type: 'SET_POST_MODEL', payload: false })
-        },
-        function () {
-          storage
-            .ref('images')
-            .child(filename)
-            .getDownloadURL()
-            .then((uri) => {
-              createUserPost(uri)
-              setLoading(false)
-            })
-        },
-      )
-    } else if (postImage) {
-      let filename = `post/post-${Date.now()}-${postImage.name}`
-      const uploadTask = storage.ref(`images/${filename}`).put(postImage)
-      uploadTask.on(
-        'state_changed',
-        () => {
-          setLoading(true)
-        },
-        (err) => {
-          console.log('error from firebase')
-          setLoading(false)
-          uiDispatch({ type: 'SET_POST_MODEL', payload: false })
-        },
-        () => {
-          storage
-            .ref('images')
-            .child(filename)
-            .getDownloadURL()
-            .then((uri) => {
-              createUserPost(uri)
-            })
-        },
-      )
+    if (isImageCaptured || postImage) {
+      createUserPost('https://picsum.photos/500/300')
     } else {
       createUserPost()
     }

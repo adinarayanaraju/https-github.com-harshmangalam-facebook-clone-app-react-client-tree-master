@@ -1,10 +1,7 @@
 import { useState, useContext } from 'react'
-import axios from 'axios'
 import { UserContext, UIContext } from '../../../App'
 import { useHistory } from 'react-router-dom'
-import { fetchCurrentUser } from '../../../services/AuthService'
-
-const url = process.env.REACT_APP_ENDPOINT
+import { signupUser } from '../../../services/AuthService'
 
 const useSignupUser = () => {
   const { uiDispatch } = useContext(UIContext)
@@ -37,42 +34,23 @@ const useSignupUser = () => {
   async function handleSignupUser(e) {
     e.preventDefault()
 
-    setLoading(true)
-    try {
-      const { data } = await axios.post(`${url}/api/auth/signup`, initialState)
-      localStorage.setItem('token', JSON.stringify(data.data.token))
-      const me = await fetchCurrentUser()
-      setLoading(false)
+    const { data, error } = await signupUser(initialState, loading, setLoading)
 
-      userDispatch({ type: 'SET_CURRENT_USER', payload: me.data.user })
-      
+    if (error) {
+      setError(error)
+    }
+
+    if (data) {
+      userDispatch({ type: 'SET_CURRENT_USER', payload: data })
       uiDispatch({
         type: 'SET_MESSAGE',
-        payload: { color: 'success', display: true, text: data.message },
+        payload: {
+          color: 'success',
+          display: true,
+          text: 'Signup successful',
+        },
       })
-     
-
       history.push('/home')
-    } catch (err) {
-      setLoading(false)
-
-      console.log(err)
-      if (err && err.response) {
-        if (err.response.status === 422) {
-          setError({ ...err.response.data.error })
-        }
-
-        if (err.response.status === 400) {
-          uiDispatch({
-            type: 'SET_MESSAGE',
-            payload: {
-              color: 'error',
-              display: true,
-              text: err.response.data.error,
-            },
-          })
-        }
-      }
     }
   }
 

@@ -1,14 +1,9 @@
 import axios from 'axios'
-const url = process.env.REACT_APP_ENDPOINT
+const url = 'http://localhost:3001'
 
 export const fetchUserById = async (user_id) => {
-  let token = JSON.parse(localStorage.token)
   try {
-    const { data } = await axios.get(`${url}/api/user/${user_id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const { data } = await axios.get(`${url}/users/${user_id}`)
     if (data) {
       return {
         data,
@@ -24,13 +19,8 @@ export const fetchUserById = async (user_id) => {
 }
 
 export const fetchRecommandedUsers = async () => {
-  let token = JSON.parse(localStorage.token)
   try {
-    const { data } = await axios.get(`${url}/api/user/recommanded_users`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const { data } = await axios.get(`${url}/users`)
     if (data) {
       return {
         data,
@@ -44,15 +34,14 @@ export const fetchRecommandedUsers = async () => {
     }
   }
 }
-
 
 export const sendFriendRequest = async (user_id) => {
-  let token = JSON.parse(localStorage.token)
+  const userId = parseInt(localStorage.getItem('userId'))
   try {
-    const { data } = await axios.get(`${url}/api/user/friend_request/${user_id}/send`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const { data } = await axios.post(`${url}/friendRequests`, {
+      senderId: userId,
+      receiverId: user_id,
+      status: 'pending',
     })
     if (data) {
       return {
@@ -67,16 +56,13 @@ export const sendFriendRequest = async (user_id) => {
     }
   }
 }
-
 
 export const fetchIncommingFriendRequests = async () => {
-  let token = JSON.parse(localStorage.token)
+  const userId = parseInt(localStorage.getItem('userId'))
   try {
-    const { data } = await axios.get(`${url}/api/user/friend_request/received`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const { data } = await axios.get(
+      `${url}/friendRequests?receiverId=${userId}&status=pending&_expand=sender`,
+    )
     if (data) {
       return {
         data,
@@ -90,17 +76,13 @@ export const fetchIncommingFriendRequests = async () => {
     }
   }
 }
-
-
 
 export const fetchSendedFriendRequests = async () => {
-  let token = JSON.parse(localStorage.token)
+  const userId = parseInt(localStorage.getItem('userId'))
   try {
-    const { data } = await axios.get(`${url}/api/user/friend_request/sended`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const { data } = await axios.get(
+      `${url}/friendRequests?senderId=${userId}&status=pending&_expand=receiver`,
+    )
     if (data) {
       return {
         data,
@@ -114,17 +96,23 @@ export const fetchSendedFriendRequests = async () => {
     }
   }
 }
-
-
 
 export const acceptFriendRequest = async (request_id) => {
-  let token = JSON.parse(localStorage.token)
   try {
-    const { data } = await axios.get(`${url}/api/user/friend_request/${request_id}/accept`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    const requestResponse = await axios.get(`${url}/friendRequests/${request_id}`)
+    const request = requestResponse.data
+    const { senderId, receiverId } = request
+
+    await axios.post(`${url}/friends`, {
+      userId: senderId,
+      friendId: receiverId,
     })
+    await axios.post(`${url}/friends`, {
+      userId: receiverId,
+      friendId: senderId,
+    })
+
+    const { data } = await axios.delete(`${url}/friendRequests/${request_id}`)
     if (data) {
       return {
         data,
@@ -138,16 +126,10 @@ export const acceptFriendRequest = async (request_id) => {
     }
   }
 }
-
 
 export const declineFriendRequest = async (request_id) => {
-  let token = JSON.parse(localStorage.token)
   try {
-    const { data } = await axios.get(`${url}/api/user/friend_request/${request_id}/decline`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const { data } = await axios.delete(`${url}/friendRequests/${request_id}`)
     if (data) {
       return {
         data,
@@ -162,17 +144,9 @@ export const declineFriendRequest = async (request_id) => {
   }
 }
 
-
-
-
 export const cancelFriendRequest = async (request_id) => {
-  let token = JSON.parse(localStorage.token)
   try {
-    const { data } = await axios.get(`${url}/api/user/friend_request/${request_id}/cancel`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const { data } = await axios.delete(`${url}/friendRequests/${request_id}`)
     if (data) {
       return {
         data,

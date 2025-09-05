@@ -1,19 +1,44 @@
 import axios from 'axios'
-const url = process.env.REACT_APP_ENDPOINT
-
+const url = 'http://localhost:3001'
 
 export const fetchFriendMessages = async (friend_id) => {
-    let token = localStorage.token && JSON.parse(localStorage.token)
-    try{
-        const res = await axios.get(`${url}/api/user/chat/${friend_id}/get_messages`,{headers:{
-            Authorization:`Bearer ${token}`
-        }})
-        return {
-            data:res.data
-        }
-
-    }catch(err){
-        console.log(err)
+  const userId = parseInt(localStorage.getItem('userId'))
+  try {
+    const { data } = await axios.get(
+      `${url}/messages?_expand=user&recipientId=${friend_id}&userId=${userId}`,
+    )
+    if (data) {
+      return {
+        data,
+      }
     }
+  } catch (err) {
+    if (err && err.response) {
+      return {
+        error: err.response.data.error,
+      }
+    }
+  }
+}
 
+export const sendMessage = async (message) => {
+  const userId = parseInt(localStorage.getItem('userId'))
+  try {
+    const { data } = await axios.post(`${url}/messages`, {
+      ...message,
+      userId,
+      createdAt: new Date().toISOString(),
+    })
+    if (data) {
+      return {
+        data,
+      }
+    }
+  } catch (err) {
+    if (err && err.response) {
+      return {
+        error: err.response.data.error,
+      }
+    }
+  }
 }

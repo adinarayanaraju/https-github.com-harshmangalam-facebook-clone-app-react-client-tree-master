@@ -4,6 +4,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 In the project directory, you can run:
 
+### `npm run server`
+
+Runs the json-server.
+
 ### `npm start`
 
 Runs the app in the development mode.<br />
@@ -66,3 +70,28 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `npm run build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+
+### Note on Image Uploads
+
+This version of the application uses a `json-server` for the backend, which does not support file uploads. Therefore, the image upload functionality has been replaced with placeholder images from `https://picsum.photos`.
+
+### Note on Node.js version
+
+If you are using a recent version of Node.js (v17+), you might encounter an error when running `npm start` or `npm run build`:
+
+```
+Error: error:0308010C:digital envelope routines::unsupported
+```
+
+To fix this, you can use the `--openssl-legacy-provider` flag. You can either set it as an environment variable:
+
+```
+export NODE_OPTIONS=--openssl-legacy-provider
+```
+
+Or you can add it to the `start` and `build` scripts in your `package.json`:
+
+```
+"start": "NODE_OPTIONS=--openssl-legacy-provider react-scripts start",
+"build": "NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
+```
