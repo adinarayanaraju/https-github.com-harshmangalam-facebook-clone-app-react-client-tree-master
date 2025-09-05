@@ -1,15 +1,9 @@
 import axios from 'axios'
-const url = process.env.REACT_APP_ENDPOINT
+const url = 'http://localhost:3001'
 
 export const fetchAllPosts = async () => {
-  let token = JSON.parse(localStorage.token)
-
   try {
-    const response = await axios.get(`${url}/api/post/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    const response = await axios.get(`${url}/posts?_expand=user`)
     if (response.data) {
       return {
         data: response.data,
@@ -20,40 +14,37 @@ export const fetchAllPosts = async () => {
   }
 }
 
-// export const fetchPostById = async (post_id) => {
-//   let token = JSON.parse(localStorage.token)
-
-//   try {
-//     const response = await axios.get(`${url}/api/post/${post_id}`, {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     })
-//     if (response.data) {
-//       return {
-//         data: response.data,
-//       }
-//     }
-//   } catch (err) {
-//     console.log(err)
-//   }
-// }
-
-export const likeDislikePost = async (post_id) => {
-  let token = JSON.parse(localStorage.token)
-
+export const fetchPostById = async (post_id) => {
   try {
-    const response = await axios.get(
-      `${url}/api/post/${post_id}/like_dislike`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
+    const response = await axios.get(`${url}/posts/${post_id}?_expand=user&_embed=comments`)
     if (response.data) {
       return {
         data: response.data,
+      }
+    }
+  } catch (err) {
+    console.log(err)
+  }
+}
+
+export const likeDislikePost = async (post_id) => {
+  try {
+    const response = await axios.get(`${url}/posts/${post_id}`)
+    const post = response.data
+    const userId = parseInt(localStorage.getItem('userId'))
+    const liked = post.likes.includes(userId)
+
+    const updatedLikes = liked
+      ? post.likes.filter((id) => id !== userId)
+      : [...post.likes, userId]
+
+    const updatedPost = { ...post, likes: updatedLikes }
+
+    const updateResponse = await axios.put(`${url}/posts/${post_id}`, updatedPost)
+
+    if (updateResponse.data) {
+      return {
+        data: updateResponse.data,
       }
     }
   } catch (err) {
@@ -69,18 +60,22 @@ export const likeDislikePost = async (post_id) => {
 
 export const likeDislikeComment = async (comment_id) => {
   try {
-    let token = JSON.parse(localStorage.token)
-    const response = await axios.get(
-      `${url}/api/post/comment/${comment_id}/like_dislike`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
-    if (response.data) {
+    const response = await axios.get(`${url}/comments/${comment_id}`)
+    const comment = response.data
+    const userId = parseInt(localStorage.getItem('userId'))
+    const liked = comment.likes.includes(userId)
+
+    const updatedLikes = liked
+      ? comment.likes.filter((id) => id !== userId)
+      : [...comment.likes, userId]
+
+    const updatedComment = { ...comment, likes: updatedLikes }
+
+    const updateResponse = await axios.put(`${url}/comments/${comment_id}`, updatedComment)
+
+    if (updateResponse.data) {
       return {
-        data: response.data,
+        data: updateResponse.data,
       }
     }
   } catch (err) {

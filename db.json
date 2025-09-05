@@ -1,0 +1,77 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "email": "john.doe@example.com",
+      "profile_pic": "https://picsum.photos/200",
+      "cover_pic": "https://picsum.photos/800/300",
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "email": "jane.smith@example.com",
+      "profile_pic": "https://picsum.photos/201",
+      "cover_pic": "https://picsum.photos/801/300",
+      "active": false
+    }
+  ],
+  "posts": [
+    {
+      "id": 1,
+      "userId": 1,
+      "content": "This is my first post!",
+      "image": "https://picsum.photos/500/300",
+      "createdAt": "2023-10-27T10:00:00Z",
+      "likes": [2],
+      "comments": [
+        {
+          "id": 1,
+          "userId": 2,
+          "content": "Nice post!",
+          "createdAt": "2023-10-27T10:05:00Z",
+          "likes": []
+        }
+      ],
+      "body": {
+        "feelings": "happy",
+        "with": [],
+        "at": "Home",
+        "date": "2023-10-27T10:00:00Z"
+      },
+      "profilePostData": {}
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "content": "Having a great day!",
+      "image": null,
+      "createdAt": "2023-10-27T11:00:00Z",
+      "likes": [1],
+      "comments": [],
+      "body": {
+        "feelings": "excited",
+        "with": [1],
+        "at": "Work",
+        "date": "2023-10-27T11:00:00Z"
+      },
+      "profilePostData": {}
+    }
+  ],
+  "friends": [
+    { "id": 1, "userId": 1, "friendId": 2 }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "postId": 1,
+      "userId": 2,
+      "content": "Nice post!",
+      "createdAt": "2023-10-27T10:05:00Z",
+      "likes": []
+    }
+  ],
+  "friendRequests": [],
+  "messages": []
+}
