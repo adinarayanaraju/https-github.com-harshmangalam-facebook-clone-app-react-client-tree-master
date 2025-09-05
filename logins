@@ -1,0 +1,7 @@
+I have configured the application to use a JSON database with the following users:
+
+User 1:
+Email: john.doe@example.com
+User 2:
+Email: jane.smith@example.com
+You can use these email addresses to log in. There is no password check implemented in this version. There is no specific admin user configured; all users have the same permissions.
